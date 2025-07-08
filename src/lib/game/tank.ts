@@ -108,6 +108,8 @@ export class Tank {
 export class Player extends Tank {
   constructor(game: Game, x: number, y: number) {
     super(game, x, y, 'hsl(var(--primary))');
+    this.maxAmmo = 100;
+    this.ammo = 10;
   }
 
   update() {
