@@ -140,42 +140,80 @@ export class Player extends Tank {
 }
 
 export class Enemy extends Tank {
-  aiTimer: number;
-  aiInterval: number;
-  aiState: 'roaming' | 'attacking' | 'idle' = 'idle';
+  aiState: 'idle' | 'aiming' | 'attacking' | 'repositioning' = 'idle';
+  stateTimer: number = 0;
+  
+  // AI parameters
+  visionRange: number = 350;
+  aimingSpeed: number = 0.04;
+  attackAngleThreshold: number = 0.1; // in radians
+  timeToLockOn: number = 750; // ms
+  repositioningTime: number = 1500; // ms
 
   constructor(game: Game, x: number, y: number) {
     super(game, x, y, 'hsl(var(--accent))');
-    this.aiTimer = 0;
-    this.aiInterval = Math.random() * 2000 + 1000;
   }
 
   update(deltaTime: number) {
-    this.aiTimer += deltaTime;
-    if(this.aiTimer > this.aiInterval) {
-        this.aiTimer = 0;
-        this.aiInterval = Math.random() * 2000 + 1500;
-        const action = Math.random();
-        if(action < 0.3) {
-            this.speed = 1.5;
-            this.rotationSpeed = 0;
-        } else if (action < 0.6) {
-            this.speed = 0;
-            this.rotationSpeed = (Math.random() - 0.5) * 0.08;
-        } else {
+    this.stateTimer += deltaTime;
+    const dx = this.game.player.x - this.x;
+    const dy = this.game.player.y - this.y;
+    const distanceToPlayer = Math.hypot(dx, dy);
+    
+    // State machine logic
+    switch (this.aiState) {
+        case 'idle':
             this.speed = 0;
             this.rotationSpeed = 0;
-            // Aim at player
-            const dx = this.game.player.x - this.x;
-            const dy = this.game.player.y - this.y;
-            this.angle = Math.atan2(dy, dx);
+            if (distanceToPlayer < this.visionRange) {
+                this.aiState = 'aiming';
+                this.stateTimer = 0;
+            }
+            break;
 
+        case 'aiming':
+            this.speed = 0;
+            const targetAngle = Math.atan2(dy, dx);
+            let angleDiff = targetAngle - this.angle;
+
+            // Normalize angle for shortest turn
+            if (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
+            if (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
+
+            if (Math.abs(angleDiff) < this.attackAngleThreshold) {
+                this.rotationSpeed = 0;
+                this.angle = targetAngle; // Snap to target
+                if (this.stateTimer > this.timeToLockOn) {
+                    this.aiState = 'attacking';
+                }
+            } else {
+                this.rotationSpeed = Math.sign(angleDiff) * this.aimingSpeed;
+                this.stateTimer = 0; // Reset lock-on timer if not aimed
+            }
+
+            if (distanceToPlayer > this.visionRange * 1.2) { // Give some buffer
+                this.aiState = 'idle';
+            }
+            break;
+
+        case 'attacking':
             const bullet = this.shoot();
-            if(bullet) {
+            if (bullet) {
                 this.game.addBullet(bullet);
             }
-        }
+            this.aiState = 'repositioning';
+            this.stateTimer = 0;
+            break;
+
+        case 'repositioning':
+            this.speed = 1.5;
+            if (this.stateTimer > this.repositioningTime) {
+                this.aiState = 'idle';
+                this.stateTimer = 0;
+            }
+            break;
     }
+
     super.update();
   }
 }
