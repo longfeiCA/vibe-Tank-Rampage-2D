@@ -57,7 +57,7 @@ export class Game {
         this.powerups = [];
         this.particles = [];
 
-        for (let i = 0; i < this.level * 2 + 1; i++) {
+        for (let i = 0; i < this.level; i++) {
             const x = Math.random() * (this.width - 50);
             const y = Math.random() * (this.height / 2);
             this.enemies.push(new Enemy(this, x, y));
