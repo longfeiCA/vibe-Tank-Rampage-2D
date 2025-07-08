@@ -57,18 +57,63 @@ export class Game {
         this.powerups = [];
         this.particles = [];
 
+        // Spawn Enemies
         for (let i = 0; i < this.level; i++) {
             const x = Math.random() * (this.width - 50);
             const y = Math.random() * (this.height / 2);
             this.enemies.push(new Enemy(this, x, y));
         }
 
-        for (let i = 0; i < 5 + this.level; i++) {
-            const x = Math.random() * (this.width - 100);
-            const y = Math.random() * (this.height - 200) + 100;
-            const width = Math.random() * 50 + 30;
-            const height = Math.random() * 50 + 30;
-            this.obstacles.push(new Obstacle(x, y, width, height));
+        // Define a safe area around the player's starting position
+        const playerSafeZone = {
+            x: this.player.x - 50,
+            y: this.player.y - 50,
+            width: this.player.width + 100,
+            height: this.player.height + 100,
+        };
+
+        // Improved Obstacle Spawning Logic
+        const numObstacles = 5 + this.level;
+        const maxAttemptsPerObstacle = 20;
+        const obstacleBuffer = 15; // Spacing between obstacles
+
+        for (let i = 0; i < numObstacles; i++) {
+            let placed = false;
+            for (let j = 0; j < maxAttemptsPerObstacle; j++) {
+                const width = Math.random() * 50 + 30;
+                const height = Math.random() * 50 + 30;
+                const x = Math.random() * (this.width - width);
+                const y = Math.random() * (this.height - height - 150) + 75; // Keep obstacles in a central band
+
+                const newObstacle = new Obstacle(x, y, width, height);
+
+                // 1. Check for collision with player safe zone
+                if (checkCollision(newObstacle, playerSafeZone)) {
+                    continue; // Try a new position
+                }
+
+                // 2. Check for collision with other obstacles
+                let isOverlapping = false;
+                for (const existingObstacle of this.obstacles) {
+                    const bufferedExisting = {
+                        x: existingObstacle.x - obstacleBuffer,
+                        y: existingObstacle.y - obstacleBuffer,
+                        width: existingObstacle.width + (obstacleBuffer * 2),
+                        height: existingObstacle.height + (obstacleBuffer * 2),
+                    };
+                    if (checkCollision(newObstacle, bufferedExisting)) {
+                        isOverlapping = true;
+                        break;
+                    }
+                }
+
+                if (!isOverlapping) {
+                    this.obstacles.push(newObstacle);
+                    placed = true;
+                    break; // Obstacle placed, move to the next one
+                }
+            }
+            // If not placed after all attempts, we just skip it.
         }
     }
     
@@ -200,12 +245,11 @@ export class Game {
         const types: PowerUpType[] = ['health', 'ammo'];
         const type = types[Math.floor(Math.random() * types.length)];
         const maxAttempts = 50; // Limit attempts to prevent infinite loop
-        let spawned = false;
-
+        
         for (let i = 0; i < maxAttempts; i++) {
             const x = Math.random() * (this.width - 20);
             const y = Math.random() * (this.height - 20);
-            const tempPowerUp = new PowerUp(x, y, type); // Create a temporary PowerUp to check collision
+            const tempPowerUp = new PowerUp(x, y, type);
 
             let collision = false;
             for (const obstacle of this.obstacles) {
@@ -217,11 +261,9 @@ export class Game {
 
             if (!collision) {
                 this.powerups.push(tempPowerUp);
-                spawned = true;
                 break; // Found a valid spot, exit loop
             }
         }
-
     }
     
     createExplosion(x: number, y: number, color: string, count: number = 20) {
