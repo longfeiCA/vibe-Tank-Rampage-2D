@@ -70,18 +70,18 @@ export class Tank {
     ctx.fillStyle = '#444';
     ctx.fill();
 
-    ctx.restore();
-
     if (this.health < this.maxHealth) {
-        const barX = this.x;
-        const barY = this.y - 10;
+        const barX = -this.width / 2;
+        const barY = -this.height / 2 - 12;
         
-        ctx.fillStyle = 'hsl(var(--accent) / 0.5)';
+        ctx.fillStyle = 'hsl(0, 100%, 30%)';
         ctx.fillRect(barX, barY, this.width, 5);
 
-        ctx.fillStyle = 'hsl(var(--primary))';
+        ctx.fillStyle = 'hsl(120, 100%, 30%)';
         ctx.fillRect(barX, barY, this.width * (this.health / this.maxHealth), 5);
     }
+      
+    ctx.restore();
   }
 
   shoot() {
