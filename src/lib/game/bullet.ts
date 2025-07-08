@@ -15,7 +15,7 @@ export class Bullet {
     this.y = y;
     this.width = 5;
     this.height = 5;
-    this.speed = 8;
+    this.speed = 4;
     this.angle = angle;
     this.owner = owner;
   }
