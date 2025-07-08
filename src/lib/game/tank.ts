@@ -152,6 +152,8 @@ export class Enemy extends Tank {
 
   constructor(game: Game, x: number, y: number) {
     super(game, x, y, 'hsl(var(--accent))');
+    this.maxHealth = 30;
+    this.health = this.maxHealth;
   }
 
   update(deltaTime: number) {
