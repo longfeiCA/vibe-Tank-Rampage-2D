@@ -107,7 +107,7 @@ export class Tank {
 
 export class Player extends Tank {
   constructor(game: Game, x: number, y: number) {
-    super(game, x, y, 'hsl(var(--primary))');
+    super(game, x, y, '#7C9B45'); // Changed player tank color to Military Green
     this.maxAmmo = 100;
     this.ammo = 10;
   }
@@ -153,7 +153,7 @@ export class Enemy extends Tank {
   repositioningTime: number = 1500; // ms
 
   constructor(game: Game, x: number, y: number) {
-    super(game, x, y, 'hsl(var(--accent))');
+    super(game, x, y, '#A84448'); // Changed enemy tank color to Brick Red
     this.maxHealth = 30;
     this.health = this.maxHealth;
   }
