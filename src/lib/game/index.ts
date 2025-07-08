@@ -191,17 +191,37 @@ export class Game {
                 this.player.health = Math.min(this.player.maxHealth, this.player.health + 25);
                 break;
             case 'ammo':
-                this.player.ammo = Math.min(this.player.maxAmmo, this.player.ammo + 5);
+                this.player.ammo = Math.min(this.player.maxAmmo, this.player.ammo + 10);
                 break;
         }
     }
     
     spawnPowerUp() {
-        const x = Math.random() * (this.width - 20);
-        const y = Math.random() * (this.height - 20);
         const types: PowerUpType[] = ['health', 'ammo'];
         const type = types[Math.floor(Math.random() * types.length)];
-        this.powerups.push(new PowerUp(x, y, type));
+        const maxAttempts = 50; // Limit attempts to prevent infinite loop
+        let spawned = false;
+
+        for (let i = 0; i < maxAttempts; i++) {
+            const x = Math.random() * (this.width - 20);
+            const y = Math.random() * (this.height - 20);
+            const tempPowerUp = new PowerUp(x, y, type); // Create a temporary PowerUp to check collision
+
+            let collision = false;
+            for (const obstacle of this.obstacles) {
+                if (checkCollision(tempPowerUp, obstacle)) {
+                    collision = true;
+                    break;
+                }
+            }
+
+            if (!collision) {
+                this.powerups.push(tempPowerUp);
+                spawned = true;
+                break; // Found a valid spot, exit loop
+            }
+        }
+
     }
     
     createExplosion(x: number, y: number, color: string, count: number = 20) {
