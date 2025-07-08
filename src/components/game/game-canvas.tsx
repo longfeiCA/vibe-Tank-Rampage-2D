@@ -35,6 +35,10 @@ const GameCanvas: FC<GameCanvasProps> = ({ onStateChange, action, onActionHandle
 
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      const gameKeys = ['arrowup', 'arrowdown', 'arrowleft', 'arrowright', ' '];
+      if (gameKeys.includes(e.key.toLowerCase())) {
+        e.preventDefault();
+      }
       if (gameRef.current) gameRef.current.keys[e.key.toLowerCase()] = true;
     };
 
