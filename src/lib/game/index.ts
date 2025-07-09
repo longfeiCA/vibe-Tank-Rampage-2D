@@ -292,7 +292,7 @@ export class Game {
             this.level++;
             this.score += 500 * (this.level -1);
             this.player.health = this.player.maxHealth;
-            this.player.ammo = this.player.maxAmmo;
+            this.player.ammo = 10;
             this.setupLevel();
             this.gameState = 'playing';
             this.updateGameState();
