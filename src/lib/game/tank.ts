@@ -146,7 +146,7 @@ export class Enemy extends Tank {
   stateTimer: number = 0;
   
   // AI parameters
-  visionRange: number = 350;
+  visionRange: number = 500;
   aimingSpeed: number = 0.04;
   attackAngleThreshold: number = 0.1; // in radians
   timeToLockOn: number = 750; // ms
