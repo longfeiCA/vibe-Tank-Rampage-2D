@@ -46,7 +46,7 @@ export class PowerUp {
             break;
         case 'ammo':
             ctx.fillStyle = 'hsl(85 37% 44%)';
-            symbol = 'A';
+            symbol = '⛼';
             break;
     }
     ctx.fillText(symbol, 0, 1);
